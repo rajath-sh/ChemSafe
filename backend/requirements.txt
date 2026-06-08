@@ -1,0 +1,33 @@
+# ── Core Framework ──
+fastapi==0.115.12
+uvicorn[standard]==0.34.2
+pydantic-settings==2.9.1
+python-multipart==0.0.20
+email-validator==2.2.0
+
+# ── Database ──
+sqlalchemy==2.0.41
+
+# ── Firebase ──
+firebase-admin==6.8.0
+
+# ── MQTT ──
+paho-mqtt==2.1.0
+
+# ── Auth / Security ──
+python-jose[cryptography]==3.4.0
+passlib[bcrypt]==1.7.4
+
+# ── Analytics (used in later phases) ──
+pandas==2.2.3
+numpy==1.26.4
+
+# ── Reports (used in later phases) ──
+openpyxl==3.1.5
+fpdf2==2.8.3
+
+# ── Utilities ──
+python-dateutil==2.9.0
+
+# ── AI ──
+google-generativeai==0.8.3

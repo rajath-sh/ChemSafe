@@ -1,0 +1,6 @@
+{
+    "mqtt_broker_url": "localhost",
+    "global_notifications_enabled": true,
+    "strict_mode_enabled": false,
+    "data_retention_days": 7
+}

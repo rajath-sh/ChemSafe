@@ -1,0 +1,44 @@
+:root {
+  /* ========================================================
+     THEME CONFIGURATION
+     Change these variables to affect the entire application
+  ======================================================== */
+  
+  /* Primary Brand Colors */
+  --color-primary: #10b981; /* Subtle Neon Emerald */
+  --color-primary-glow: rgba(16, 185, 129, 0.4);
+  
+  --color-secondary: #3b82f6; /* Tech Blue */
+  --color-secondary-glow: rgba(59, 130, 246, 0.4);
+
+  /* Status / Alert Colors (Slightly Neon) */
+  --color-critical: #ef4444; /* Neon Red */
+  --color-critical-glow: rgba(239, 68, 68, 0.4);
+  
+  --color-warning: #f59e0b; /* Amber */
+  --color-warning-glow: rgba(245, 158, 11, 0.4);
+
+  --color-safe: #10b981; /* Emerald */
+  --color-safe-glow: rgba(16, 185, 129, 0.4);
+  
+  --color-info: #3b82f6; /* Blue */
+
+  /* Background & Surface Colors (Dark Theme) */
+  --bg-dark: #0f1115; /* Deep Charcoal */
+  --bg-panel: rgba(23, 25, 33, 0.65); /* Glassmorphism Base */
+  --bg-panel-hover: rgba(30, 33, 43, 0.8);
+  
+  /* Borders */
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(255, 255, 255, 0.2);
+
+  /* Typography */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  
+  /* Effects */
+  --blur-md: blur(12px);
+  --blur-lg: blur(20px);
+  --shadow-glow: 0 0 15px var(--color-primary-glow);
+  --transition-fast: 0.2s ease;
+}
