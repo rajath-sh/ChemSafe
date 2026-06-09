@@ -45,7 +45,7 @@ class SensorProcessor:
         self._analyze_sensor(lab_id, SensorType.LIGHT, payload.get("light"), threshold_map.get(SensorType.LIGHT))
         self._analyze_sensor(lab_id, SensorType.VIBRATION, payload.get("vibration"), threshold_map.get(SensorType.VIBRATION))
 
-        # 4. (Future) Anomaly Detection Engine hook can go here
+        # 5. (Future) Anomaly Detection Engine hook can go here
 
     def _analyze_sensor(self, lab_id: str, sensor_type: SensorType, value: float | None, threshold):
         if value is None:
@@ -58,13 +58,6 @@ class SensorProcessor:
             # Fallback to default thresholds if not defined in DB
             class DefaultThreshold:
                 def __init__(self, s_type):
-                    self.warning_value = (
-                        2.0 if s_type == SensorType.VIBRATION else
-                        35.0 if s_type == SensorType.TEMPERATURE else
-                        75.0 if s_type == SensorType.HUMIDITY else
-                        5.0 if s_type == SensorType.GAS else
-                        800.0
-                    )
                     self.critical_value = (
                         5.0 if s_type == SensorType.VIBRATION else
                         45.0 if s_type == SensorType.TEMPERATURE else
@@ -72,9 +65,14 @@ class SensorProcessor:
                         10.0 if s_type == SensorType.GAS else
                         1000.0
                     )
+                    # Dynamic warning based purely on critical (80%)
+                    self.warning_value = self.critical_value * 0.8
                     self.min_value = None
                     self.max_value = None
             threshold = DefaultThreshold(sensor_type)
+        else:
+            # Enforce dynamic relative scaling! Warning is always 80% of whatever Critical is set to by Admin.
+            threshold.warning_value = threshold.critical_value * 0.8
 
         # Threshold logic
         severity = None

@@ -12,12 +12,15 @@ import {
   ShieldAlert, 
   Settings,
   FileText,
-  Bot
+  Bot,
+  Map,
+  Cpu
 } from 'lucide-react';
 import './Sidebar.css';
 
 const navItems = [
   { path: '/', icon: <LayoutDashboard size={20} />, label: 'Dashboard', roles: ['admin', 'staff', 'viewer'] },
+  { path: '/navigation', icon: <Map size={20} />, label: 'Navigation', roles: ['admin', 'staff', 'viewer'] },
   { path: '/sensors', icon: <Activity size={20} />, label: 'Sensors', roles: ['admin', 'staff', 'viewer'] },
   { path: '/alerts', icon: <AlertTriangle size={20} />, label: 'Alerts & Incidents', roles: ['admin', 'staff', 'viewer'] },
   { path: '/analytics', icon: <BarChart3 size={20} />, label: 'Analytics', roles: ['admin', 'staff', 'viewer'] },
@@ -27,6 +30,7 @@ const navItems = [
   { path: '/ai-assistant', icon: <Bot size={20} />, label: 'AI Assistant', roles: ['admin', 'staff', 'viewer'] },
   { path: '/settings', icon: <Settings size={20} />, label: 'Settings', roles: ['admin'] },
   { path: '/users', icon: <ClipboardList size={20} />, label: 'Users', roles: ['admin'] },
+  { path: '/algorithms', icon: <Cpu size={20} />, label: 'Algorithms Dashboard', roles: ['admin', 'staff', 'viewer'] },
 ];
 
 export const Sidebar = () => {

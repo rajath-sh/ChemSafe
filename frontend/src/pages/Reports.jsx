@@ -4,8 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
-import { FileText, Printer, Calendar, MapPin, ShieldAlert, FlaskConical, Bot } from 'lucide-react';
+import { FileText, Printer, Calendar, MapPin, ShieldAlert, FlaskConical, Bot, Zap, X, CheckCircle, Download } from 'lucide-react';
 import './Reports.css';
+import { compressHuffman } from '../utils/HuffmanCoding';
 
 export const Reports = () => {
   const { apiFetch, currentUser } = useAuth();
@@ -21,6 +22,10 @@ export const Reports = () => {
   const [facilities, setFacilities] = useState([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [reportData, setReportData] = useState(null);
+
+  // Huffman Compression State
+  const [huffmanResult, setHuffmanResult] = useState(null);
+  const [showHuffmanModal, setShowHuffmanModal] = useState(false);
 
   // Hardcoded labs for safety reports (since labs aren't dynamically tracked yet)
   const labs = [
@@ -80,6 +85,31 @@ export const Reports = () => {
     const reportText = JSON.stringify(reportData.data, null, 2);
     const initialText = `${reportText}\n\n`;
     navigate('/ai-assistant', { state: { initialText } });
+  };
+
+  const handleCompress = () => {
+    if (!reportData) return;
+    const jsonStr = JSON.stringify(reportData);
+    const result = compressHuffman(jsonStr);
+    setHuffmanResult({ ...result, originalStr: jsonStr });
+    setShowHuffmanModal(true);
+  };
+
+  const handleExportHuffman = () => {
+    if (!huffmanResult) return;
+    const exportData = {
+      encodedStr: huffmanResult.encodedStr,
+      codes: huffmanResult.codes
+    };
+    const blob = new Blob([JSON.stringify(exportData)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `chemsafe-compressed-report-${Date.now()}.huf.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -302,9 +332,12 @@ export const Reports = () => {
 
               <div className="report-footer">
                 <p>CONFIDENTIAL — DO NOT DISTRIBUTE WITHOUT AUTHORIZATION</p>
-                <div className="no-print print-btn-container" style={{ display: 'flex', gap: '12px' }}>
+                <div className="no-print print-btn-container" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                   <Button onClick={handlePrint}><Printer size={16} style={{marginRight: '8px'}} /> Print / Save as PDF</Button>
                   <Button onClick={handleGoToAI} style={{ backgroundColor: 'var(--color-primary)' }}><Bot size={16} style={{marginRight: '8px'}} /> Ask AI</Button>
+                  <Button onClick={handleCompress} variant="secondary" style={{ border: '1px solid var(--color-warning)', color: 'var(--color-warning)' }}>
+                    <Zap size={16} style={{marginRight: '8px'}} /> Compress Report (Huffman)
+                  </Button>
                 </div>
               </div>
 
@@ -313,6 +346,64 @@ export const Reports = () => {
         </div>
 
       </div>
+
+      {/* Huffman Compression Modal */}
+      {showHuffmanModal && huffmanResult && (
+        <div className="modal-overlay" onClick={() => setShowHuffmanModal(false)}>
+          <div className="modal-content" onClick={e => e.stopPropagation()} style={{maxWidth: '700px'}}>
+            <div className="modal-header">
+              <h2>Huffman Lossless Compression</h2>
+              <button className="close-button" onClick={() => setShowHuffmanModal(false)}><X size={20} /></button>
+            </div>
+            <div className="modal-body" style={{marginTop: '20px'}}>
+              
+              <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '20px'}}>
+                <div className="stat-box">
+                  <div className="stat-val" style={{fontSize: '1.5rem'}}>{(huffmanResult.originalSizeBits / 8).toLocaleString()} B</div>
+                  <div className="stat-label">Original Size</div>
+                </div>
+                <div className="stat-box" style={{background: 'rgba(52, 211, 153, 0.1)', borderColor: 'var(--color-success)'}}>
+                  <div className="stat-val" style={{fontSize: '1.5rem', color: 'var(--color-success)'}}>{(huffmanResult.compressedSizeBits / 8).toFixed(0).toLocaleString()} B</div>
+                  <div className="stat-label">Compressed Size</div>
+                </div>
+                <div className="stat-box warning">
+                  <div className="stat-val" style={{fontSize: '1.5rem'}}>{huffmanResult.compressionRatio}%</div>
+                  <div className="stat-label">Space Saved</div>
+                </div>
+              </div>
+
+              <h4 style={{marginBottom: '10px'}}>Encoded Binary Bit-String</h4>
+              <div style={{
+                background: 'rgba(0,0,0,0.3)', 
+                padding: '10px', 
+                borderRadius: '4px', 
+                fontFamily: 'monospace', 
+                wordBreak: 'break-all', 
+                maxHeight: '150px', 
+                overflowY: 'auto',
+                fontSize: '0.8rem',
+                color: 'var(--color-primary)',
+                border: '1px solid var(--border-color)'
+              }}>
+                {huffmanResult.encodedStr}
+              </div>
+
+              <div style={{marginTop: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between'}}>
+                <p style={{fontSize: '0.9rem', color: 'var(--text-muted)'}}>
+                  The original JSON payload was converted into an optimal prefix tree and encoded as pure binary logic.
+                </p>
+                <div style={{display: 'flex', gap: '10px', alignItems: 'center'}}>
+                  <Button variant="secondary" onClick={handleExportHuffman}>
+                    <Download size={16} style={{marginRight: '8px'}} /> Export Compressed File
+                  </Button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

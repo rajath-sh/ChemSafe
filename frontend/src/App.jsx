@@ -9,14 +9,15 @@ import { Analytics } from './pages/Analytics';
 import { AlertsIncidents } from './pages/AlertsIncidents';
 import { Staff } from './pages/Staff';
 import { Inventory } from './pages/Inventory';
-
+import { AiAssistant } from './pages/AiAssistant';
+import { Navigation } from './pages/Navigation';
 import { Reports } from './pages/Reports';
+import { AlgorithmsDashboard } from './pages/AlgorithmsDashboard';
 
 // Placeholder Pages for routing
 import { Activity, AlertTriangle, ShieldAlert, Users } from 'lucide-react';
 import { Dashboard } from './pages/Dashboard';
 import { Settings } from './pages/Settings';
-import { AiAssistant } from './pages/AiAssistant';
 
 function App() {
   const { currentUser, loading } = useAuth();
@@ -35,14 +36,19 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/sensors" element={<NodesManagement />} />
         <Route path="/alerts" element={<AlertsIncidents />} />
-        <Route path="/incidents" element={<Navigate to="/alerts" replace />} />
+        <Route path="/incidents" element={<AlertsIncidents />} />
         <Route path="/staff" element={<Staff />} />
         <Route path="/inventory" element={<Inventory />} />
+        <Route path="/navigation" element={<Navigation />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/reports" element={<Reports />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/users" element={<UsersManagement />} />
+        <Route path="/algorithms" element={<AlgorithmsDashboard />} />
+        <Route path="/ai" element={<AiAssistant />} />
         <Route path="/ai-assistant" element={<AiAssistant />} />
+        <Route path="/navigation" element={<Navigation />} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Layout>

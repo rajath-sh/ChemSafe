@@ -21,6 +21,7 @@ class InventoryLocationOut(TimestampMixin):
 class ChemicalCreate(BaseModel):
     location_id: str
     name: str = Field(..., min_length=2)
+    description: Optional[str] = None
     cas_number: Optional[str] = None
     hazard_class: HazardClass
     quantity: float = Field(..., ge=0)
@@ -31,11 +32,13 @@ class ChemicalUpdate(BaseModel):
     quantity: Optional[float] = Field(None, ge=0)
     location_id: Optional[str] = None
     image_url: Optional[str] = None
+    description: Optional[str] = None
 
 class ChemicalOut(TimestampMixin):
     chemical_id: str
     location_id: str
     name: str
+    description: Optional[str]
     cas_number: Optional[str]
     hazard_class: HazardClass
     quantity: float

@@ -105,21 +105,21 @@ from modules.sensors.router import router as sensors_router
 from modules.mqtt_ingestion.listener import router as mqtt_router
 from modules.alerts.router import router as alerts_router
 from modules.incidents.router import router as incidents_router
-from modules.staff.router import router as staff_router
-from modules.inventory.router import router as inventory_router
+from modules.ai.router import router as ai_router
+from modules.navigation.router import router as navigation_router
+from modules.classifier.router import router as classifier_router
 from modules.notifications.router import router as notifications_router
 from modules.analytics.router import router as analytics_router
 from modules.audit_logs.router import router as audit_logs_router
 from modules.settings.router import router as settings_router
 from modules.reports.router import router as reports_router
+from modules.staff.router import router as staff_router
+from modules.inventory.router import router as inventory_router
 from modules.dashboard.router import router as dashboard_router
-from modules.ai.router import router as ai_router
 
 app.include_router(users_router,         prefix="/api/users",         tags=["Users"])
 app.include_router(sensors_router,       prefix="/api/sensors",       tags=["Sensors"])
 app.include_router(mqtt_router,          prefix="/api/mqtt",          tags=["MQTT"])
-app.include_router(alerts_router,        prefix="/api/alerts",        tags=["Alerts"])
-app.include_router(incidents_router,     prefix="/api/incidents",     tags=["Incidents"])
 app.include_router(staff_router,         prefix="/api/staff",         tags=["Staff & Assignments"])
 app.include_router(inventory_router,     prefix="/api/inventory",     tags=["Chemical Inventory"])
 app.include_router(notifications_router, prefix="/api/notifications", tags=["Notifications"])
@@ -128,7 +128,11 @@ app.include_router(audit_logs_router,    prefix="/api/audit-logs",    tags=["Aud
 app.include_router(settings_router,      prefix="/api/settings",      tags=["Settings"])
 app.include_router(reports_router,       prefix="/api/reports",       tags=["Reports"])
 app.include_router(dashboard_router,     prefix="/api/dashboard",     tags=["Dashboard"])
+app.include_router(alerts_router,        prefix="/api/alerts",        tags=["Alerts"])
+app.include_router(incidents_router,     prefix="/api/incidents",     tags=["Incidents"])
 app.include_router(ai_router,            prefix="/api/ai",            tags=["AI Assistant"])
+app.include_router(navigation_router,    prefix="/api/navigation",    tags=["Navigation"])
+app.include_router(classifier_router,    prefix="/api/classifier",    tags=["Classifier"])
 
 
 # ═══════════════════════════════════════════════════════════════

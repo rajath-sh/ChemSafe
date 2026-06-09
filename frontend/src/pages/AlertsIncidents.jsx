@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Badge } from '../components/ui/Badge';
 import { 
@@ -7,9 +7,14 @@ import {
   Activity, 
   CheckCircle2, 
   ArrowRight,
-  Clock
+  Clock,
+  Brain,
+  X,
+  PlusCircle
 } from 'lucide-react';
+import { PriorityQueue } from '../utils/PriorityQueue';
 import './AlertsIncidents.css';
+
 
 export const AlertsIncidents = () => {
   const { apiFetch, currentUser } = useAuth();
@@ -19,6 +24,53 @@ export const AlertsIncidents = () => {
   const [labs, setLabs] = useState([]);
   
   const [loading, setLoading] = useState(true);
+
+  // Priority Queue State
+  const [isPrioritySorted, setIsPrioritySorted] = useState(false);
+  const [showQueueVisualizer, setShowQueueVisualizer] = useState(false);
+
+
+  // Add Alert State
+  const [showAddAlert, setShowAddAlert] = useState(false);
+  const [newAlertData, setNewAlertData] = useState({
+    lab_id: '',
+    alert_type: 'gas',
+    severity: 'medium',
+    message: '',
+    sensor_value: '',
+    threshold_value: ''
+  });
+
+
+  const handleCreateAlert = async (e) => {
+    e.preventDefault();
+    try {
+      await apiFetch('/api/alerts', {
+        method: 'POST',
+        body: JSON.stringify({
+          lab_id: newAlertData.lab_id || (labs.length > 0 ? labs[0].lab_id : 'MOCK-LAB-01'),
+          alert_type: newAlertData.alert_type,
+          severity: newAlertData.severity,
+          message: newAlertData.message || 'Manual simulation alert',
+          sensor_value: newAlertData.sensor_value ? parseFloat(newAlertData.sensor_value) : null,
+          threshold_value: newAlertData.threshold_value ? parseFloat(newAlertData.threshold_value) : null
+        })
+      });
+      setShowAddAlert(false);
+      setNewAlertData({
+        lab_id: '',
+        alert_type: 'gas',
+        severity: 'medium',
+        message: '',
+        sensor_value: '',
+        threshold_value: ''
+      });
+      fetchData(); // Refresh the feed
+    } catch (err) {
+      console.error(err);
+      alert("Failed to create alert.");
+    }
+  };
 
   const fetchData = async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
@@ -38,9 +90,11 @@ export const AlertsIncidents = () => {
 
       // 3. Fetch Incidents
       const incidentsData = await apiFetch('/api/incidents');
-      setIncidents(incidentsData);
+      // Default to chronological sorting (newest first)
+      const chronologicalIncidents = [...incidentsData].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+      setIncidents(chronologicalIncidents);
 
-      // 4. Fetch Staff for Assignment Dropdown
+      // 4. Fetch Staff Users (for assignment) Dropdown
       const staffData = await apiFetch('/api/staff');
       setStaffUsers(staffData);
 
@@ -213,9 +267,18 @@ export const AlertsIncidents = () => {
         
         {/* LEFT PANEL: 30% Alert Feed */}
         <div className="alerts-feed">
-          <div className="feed-header">
+          <div className="feed-header" style={{flexWrap: 'wrap'}}>
             <h3><Activity size={20} color="var(--color-warning)" /> Live Alert Feed</h3>
-            <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+            <div style={{display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: '5px'}}>
+              {currentUser.role === 'admin' && (
+                <button 
+                  className="btn-secondary" 
+                  style={{padding: '4px 12px', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '4px'}}
+                  onClick={() => setShowAddAlert(true)}
+                >
+                  <PlusCircle size={14} /> Simulate Alert
+                </button>
+              )}
               <Badge variant="neutral">{alerts.filter(a => a.status !== 'closed' && a.status !== 'converted_to_incident').length}</Badge>
               {currentUser.role === 'admin' && (
                 <button className="btn-secondary" style={{padding: '2px 8px', fontSize: '0.75rem'}} onClick={handleClearAll}>
@@ -289,8 +352,23 @@ export const AlertsIncidents = () => {
         <div className="incidents-board">
           <div className="board-header">
             <h3><ShieldAlert size={20} color="var(--color-primary)" /> Incident Board</h3>
-            <div style={{display: 'flex', gap: '8px'}}>
-              <button className="btn-secondary" onClick={fetchData}>Refresh Board</button>
+            <div style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
+              <button 
+                className={isPrioritySorted ? "btn-primary" : "btn-secondary"}
+                onClick={() => setIsPrioritySorted(true)}
+              >
+                Sort by Priority
+              </button>
+              <button 
+                className={!isPrioritySorted ? "btn-primary" : "btn-secondary"}
+                onClick={() => setIsPrioritySorted(false)}
+              >
+                Chronological
+              </button>
+              <button className="btn-secondary" onClick={() => setShowQueueVisualizer(true)}>
+                <Brain size={14} style={{marginRight: '4px'}} /> Visualize Queue
+              </button>
+              <button className="btn-secondary" onClick={() => fetchData()}>Refresh Board</button>
               {currentUser.role === 'admin' && (
                 <button className="btn-secondary" onClick={handleClearIncidents}>Clear All Incidents</button>
               )}
@@ -306,16 +384,32 @@ export const AlertsIncidents = () => {
                 <div>No active incidents requiring attention.</div>
               </div>
             ) : (
-              incidents.map(inc => {
-                // Find users currently assigned to an active incident
-                const assignedStaffIds = incidents
-                  .filter(i => i.status !== 'resolved' && i.assigned_staff_id)
-                  .map(i => i.assigned_staff_id);
+              (() => {
+                let displayIncidents = incidents;
+                if (isPrioritySorted) {
+                  const pq = new PriorityQueue();
+                  incidents.forEach(inc => pq.insert(inc));
+                  displayIncidents = [];
+                  let max = pq.extractMax();
+                  while (max) {
+                    displayIncidents.push(max);
+                    max = pq.extractMax();
+                  }
+                }
+                return displayIncidents.map((inc, index) => {
+                  // Find users currently assigned to an active incident
+                  const assignedStaffIds = incidents
+                    .filter(i => i.status !== 'resolved' && i.assigned_staff_id)
+                    .map(i => i.assigned_staff_id);
 
-                return (
-                  <div key={inc.incident_id} className="incident-card" style={inc.rejection_reason ? { borderLeft: '4px solid var(--color-critical)' } : {}}>
-                    
-                    <div className="incident-card-top">
+                  return (
+                    <div key={inc.incident_id} className="incident-card" style={inc.rejection_reason ? { borderLeft: '4px solid var(--color-critical)' } : {}}>
+                      {isPrioritySorted && (
+                        <div style={{ position: 'absolute', top: '-10px', left: '-10px', background: 'var(--color-primary)', color: 'black', width: '24px', height: '24px', borderRadius: '50%', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '0.8rem', fontWeight: 'bold', zIndex: 10 }}>
+                          {index + 1}
+                        </div>
+                      )}
+                      <div className="incident-card-top">
                       <div>
                         <div className="incident-title">{inc.title}</div>
                         <div className="incident-meta">
@@ -423,12 +517,176 @@ export const AlertsIncidents = () => {
 
                   </div>
                 );
-              })
+              });
+            })()
             )}
           </div>
         </div>
 
       </div>
+
+
+
+      {/* Priority Queue Visualizer Modal */}
+      {showQueueVisualizer && (
+        <div className="modal-overlay" onClick={() => setShowQueueVisualizer(false)}>
+          <div className="modal-content" style={{maxWidth: '800px'}} onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Priority Queue Array (Max-Heap)</h2>
+              <button className="btn-icon" onClick={() => setShowQueueVisualizer(false)}><X size={20} /></button>
+            </div>
+            
+            <div className="modal-body">
+              <p style={{marginBottom: '20px', color: 'var(--text-muted)'}}>
+                This visualizer shows the underlying flat-array structure of the Max-Heap after all incidents have been inserted. 
+                Nodes at index <code>i</code> have children at <code>2i + 1</code> and <code>2i + 2</code>.
+              </p>
+
+              <div style={{background: 'rgba(0,0,0,0.3)', padding: '20px', borderRadius: '8px', overflowX: 'auto'}}>
+                {(() => {
+                  const pq = new PriorityQueue();
+                  incidents.forEach(inc => pq.insert(inc));
+                  const heapArray = pq.getHeap();
+
+                  if (heapArray.length === 0) {
+                    return <div style={{textAlign: 'center', color: 'var(--text-muted)'}}>Queue is empty.</div>;
+                  }
+
+                  return (
+                    <div style={{display: 'flex', gap: '10px'}}>
+                      {heapArray.map((node, i) => (
+                        <div key={i} style={{
+                          minWidth: '150px',
+                          background: 'rgba(255,255,255,0.05)',
+                          border: '1px solid var(--color-primary)',
+                          borderRadius: '8px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          overflow: 'hidden'
+                        }}>
+                          <div style={{background: 'var(--color-primary)', color: 'black', padding: '4px 8px', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center'}}>
+                            Index: {i}
+                          </div>
+                          <div style={{padding: '10px', fontSize: '0.85rem'}}>
+                            <div style={{marginBottom: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                              <strong>{node.title || node.incident_id}</strong>
+                            </div>
+                            <div style={{color: node.severity === 'critical' ? 'var(--color-critical)' : 'var(--color-warning)'}}>
+                              {node.severity.toUpperCase()}
+                            </div>
+                            <div style={{marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-muted)'}}>
+                              <div style={{color: 'var(--color-primary)'}}>Total Score: {node._priorityScore.toFixed(0)}</div>
+                              <div style={{fontSize: '0.65rem', marginTop: '2px'}}>
+                                <div>Base Severity: {(node._priorityScore >= 4000000000 ? 4 : node._priorityScore >= 3000000000 ? 3 : node._priorityScore >= 2000000000 ? 2 : 1)}B</div>
+                                <div>Age Factor: +{(node._priorityScore % 1000000000).toFixed(0)} pts</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  );
+                })()}
+              </div>
+
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Alert Modal */}
+      {showAddAlert && (
+        <div className="modal-overlay" onClick={() => setShowAddAlert(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{maxWidth: '500px'}}>
+            <div className="modal-header">
+              <h2>Simulate Custom Alert</h2>
+              <button className="close-button" onClick={() => setShowAddAlert(false)}><X size={20} /></button>
+            </div>
+            <form className="modal-body" onSubmit={handleCreateAlert} style={{display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '15px'}}>
+              <div className="form-group">
+                <label>Target Laboratory</label>
+                <select 
+                  className="form-control"
+                  value={newAlertData.lab_id}
+                  onChange={e => setNewAlertData({...newAlertData, lab_id: e.target.value})}
+                  required
+                >
+                  <option value="">Select a Lab...</option>
+                  {labs.map(lab => (
+                    <option key={lab.lab_id} value={lab.lab_id}>{lab.lab_name} ({lab.lab_id})</option>
+                  ))}
+                  <option value="MOCK-LAB-01">MOCK-LAB-01 (Simulation)</option>
+                </select>
+              </div>
+
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
+                <div className="form-group">
+                  <label>Alert Type</label>
+                  <select className="form-control" value={newAlertData.alert_type} onChange={e => setNewAlertData({...newAlertData, alert_type: e.target.value})}>
+                    <option value="gas">Gas Leak</option>
+                    <option value="temperature">Temperature Spike</option>
+                    <option value="humidity">Humidity Out of Bounds</option>
+                    <option value="vibration">Seismic / Vibration</option>
+                    <option value="light">Photochemical Risk</option>
+                    <option value="anomaly">Algorithm Anomaly</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label>Severity Level</label>
+                  <select className="form-control" value={newAlertData.severity} onChange={e => setNewAlertData({...newAlertData, severity: e.target.value})}>
+                    <option value="critical">CRITICAL</option>
+                    <option value="high">HIGH</option>
+                    <option value="medium">MEDIUM</option>
+                    <option value="low">LOW</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label>Description / Message</label>
+                <textarea 
+                  className="form-control"
+                  value={newAlertData.message}
+                  onChange={e => setNewAlertData({...newAlertData, message: e.target.value})}
+                  placeholder="E.g., Methane gas exceeds 400ppm..."
+                  rows={2}
+                  required
+                />
+              </div>
+
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px'}}>
+                <div className="form-group">
+                  <label>Sensor Reading (Optional)</label>
+                  <input 
+                    type="number"
+                    className="form-control"
+                    value={newAlertData.sensor_value}
+                    onChange={e => setNewAlertData({...newAlertData, sensor_value: e.target.value})}
+                    placeholder="e.g. 450"
+                  />
+                </div>
+                <div className="form-group">
+                  <label>Threshold Trigger (Optional)</label>
+                  <input 
+                    type="number"
+                    className="form-control"
+                    value={newAlertData.threshold_value}
+                    onChange={e => setNewAlertData({...newAlertData, threshold_value: e.target.value})}
+                    placeholder="e.g. 400"
+                  />
+                </div>
+              </div>
+
+              <div style={{marginTop: '10px', display: 'flex', justifyContent: 'flex-end', gap: '10px'}}>
+                <button type="button" className="btn-secondary" onClick={() => setShowAddAlert(false)}>Cancel</button>
+                <button type="submit" className="btn-primary" disabled={loading}>
+                  Inject Alert
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
