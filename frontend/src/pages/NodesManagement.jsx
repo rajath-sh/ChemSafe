@@ -87,7 +87,7 @@ export const NodesManagement = () => {
           body: JSON.stringify({
             lab_id: newNode.lab_id,
             sensor_type: type,
-            status: 'offline'
+            status: 'online'
           })
         })
       ));
