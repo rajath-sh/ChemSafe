@@ -473,7 +473,7 @@ export const AlertsIncidents = () => {
                               const isBusy = assignedStaffIds.includes(u.user_id) && inc.assigned_staff_id !== u.user_id;
                               return (
                                 <option key={u.user_id} value={u.user_id} disabled={isBusy}>
-                                  {u.name} ({u.role || u.department || 'Staff'}) {isBusy ? '- BUSY' : ''}
+                                  {u.name} {isBusy ? '- BUSY' : ''}
                                 </option>
                               );
                             })}
@@ -626,7 +626,6 @@ export const AlertsIncidents = () => {
                     <option value="gas">Gas Leak</option>
                     <option value="temperature">Temperature Spike</option>
                     <option value="humidity">Humidity Out of Bounds</option>
-                    <option value="vibration">Seismic / Vibration</option>
                     <option value="light">Photochemical Risk</option>
                     <option value="anomaly">Algorithm Anomaly</option>
                   </select>

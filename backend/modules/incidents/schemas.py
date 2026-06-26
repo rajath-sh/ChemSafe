@@ -22,6 +22,7 @@ class IncidentCreate(BaseModel):
     alert_id: Optional[str] = None
 
 class IncidentUpdate(BaseModel):
+    description: Optional[str] = None
     status: Optional[IncidentStatus] = None
     assigned_staff_id: Optional[str] = None
     resolution_summary: Optional[str] = None
