@@ -26,7 +26,7 @@ def mq135_to_ppm(raw: float) -> float:
     # Calibration: Hardware baseline is ~1122 raw in normal air, which yields ratio ~0.3458 and unscaled ppm ~2240.
     # Real-world testing at night (terrace/room) outputs unscaled values much higher (leading to 1000-1900 PPM).
     # We apply an aggressive empirical scaling factor to center these environmental readings back to ~400 PPM (fresh air).
-    ppm = ppm * (400.0 / 8400.0)
+    ppm = ppm * (400.0 / 4200.0)
     
     return round(ppm, 2)
 
