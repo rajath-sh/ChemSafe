@@ -191,10 +191,10 @@ export const Dashboard = () => {
               <button className="btn-text" onClick={() => navigate('/sensors')}>Manage <ArrowRight size={14}/></button>
             </div>
             <div className="sensor-list">
-              {data.sensors.length === 0 ? (
+              {data.sensors.filter(s => s.type !== 'vibration').length === 0 ? (
                 <div className="empty-state" style={{padding: '20px 0'}}>No sensors provisioned.</div>
               ) : (
-                data.sensors.slice(0, 5).map(sensor => (
+                data.sensors.filter(s => s.type !== 'vibration').slice(0, 5).map(sensor => (
                   <div key={sensor.sensor_id} className="sensor-row">
                     <div style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
                       <div className={`status-dot ${sensor.status}`}></div>
