@@ -311,7 +311,8 @@ export const Analytics = () => {
                           headers['X-Dev-User-Id'] = 'DEV-admin-001';
                         }
                         
-                        const response = await fetch(`http://127.0.0.1:8000/api/sensors/readings/${selectedNode.lab_id}/export?days=1`, { headers });
+                        const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+                        const response = await fetch(`${baseUrl}/api/sensors/readings/${selectedNode.lab_id}/export?days=1`, { headers });
                         if (!response.ok) throw new Error("Failed to export data");
                         
                         const blob = await response.blob();

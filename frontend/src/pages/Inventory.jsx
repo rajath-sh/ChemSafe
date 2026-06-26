@@ -130,7 +130,8 @@ export const Inventory = () => {
         formData.append('file', imageFile);
         
         const token = localStorage.getItem('chemsafe_token');
-        const uploadRes = await fetch('http://localhost:8000/api/inventory/upload', {
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+        const uploadRes = await fetch(`${baseUrl}/api/inventory/upload`, {
           method: 'POST',
           headers: token ? { 'Authorization': `Bearer ${token}` } : {},
           body: formData
@@ -198,7 +199,8 @@ export const Inventory = () => {
       formData.append('file', file);
       
       const token = localStorage.getItem('chemsafe_token');
-      const response = await fetch(`http://localhost:8000/api/inventory/locations/${selectedLocation.location_id}/import`, {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${baseUrl}/api/inventory/locations/${selectedLocation.location_id}/import`, {
         method: 'POST',
         headers: token ? { 'Authorization': `Bearer ${token}` } : {},
         body: formData

@@ -34,7 +34,8 @@ export const AuthProvider = ({ children }) => {
       headers['X-Dev-User-Id'] = 'DEV-admin-001';
     }
 
-    const response = await fetch(`http://127.0.0.1:8000${endpoint}`, {
+    const baseUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+    const response = await fetch(`${baseUrl}${endpoint}`, {
       ...options,
       headers,
     });

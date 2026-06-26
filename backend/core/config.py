@@ -48,7 +48,7 @@ class Settings(BaseSettings):
     # ── Application ───────────────────────────────────────────
     APP_NAME: str = "ChemSafe IoT"
     APP_VERSION: str = "1.0.0"
-    CORS_ORIGINS: str = '["http://localhost:3000","http://localhost:5173"]'
+    CORS_ORIGINS: str = '["*"]'
 
     # ── Auth ──────────────────────────────────────────────────
     AUTH_DISABLED: bool = True  # Set False in production
