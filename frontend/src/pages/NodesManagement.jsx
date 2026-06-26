@@ -320,7 +320,7 @@ export const NodesManagement = () => {
                       </div>
                       {node.location && <span className="node-location" style={{display: 'block', marginTop: '6px'}}>• {node.location}</span>}
                     </div>
-                    <div className="node-actions" style={{display: 'flex', gap: '8px'}}>
+                    <div className="node-actions" style={{display: 'flex', gap: '8px', flexWrap: 'wrap'}}>
                       <RemoteAlarmToggle labId={node.lab_id} />
                       <Button size="sm" variant="secondary" title="View/Configure Thresholds" onClick={() => openConfigModal(node)}>
                         <Settings size={14} />
