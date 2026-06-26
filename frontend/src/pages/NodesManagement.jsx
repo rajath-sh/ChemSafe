@@ -409,7 +409,7 @@ export const NodesManagement = () => {
           <Card className="modal-content">
             <h3>Provision New ESP32 Node</h3>
             <p className="modal-desc">
-              This will register a new hardware node and automatically initialize the 5 mandatory sensors (Temperature, Humidity, Gas, Light, Vibration).
+              This will register a new hardware node and automatically initialize the sensors.
             </p>
             <form onSubmit={handleAddNode}>
               <div className="form-group">
