@@ -29,8 +29,8 @@ def simulate_readings(lab_id: str):
         "lab_id": lab_id,
         "temperature": random.uniform(80.0, 100.0) if is_anomaly else random.uniform(20.0, 25.0),
         "humidity": random.uniform(80.0, 95.0) if is_anomaly else random.uniform(40.0, 50.0),
-        "gas": random.uniform(500.0, 1500.0) if is_anomaly else random.uniform(150.0, 300.0),
-        "light": random.uniform(100.0, 800.0) if is_anomaly else random.uniform(3000.0, 4000.0),
+        "gas": random.uniform(2000.0, 3000.0) if is_anomaly else random.uniform(1050.0, 1150.0),
+        "light": random.uniform(100.0, 300.0) if is_anomaly else random.uniform(800.0, 900.0),
         "timestamp": datetime.utcnow().isoformat()
     }
     

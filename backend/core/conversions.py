@@ -23,9 +23,9 @@ def mq135_to_ppm(raw: float) -> float:
 
     ppm = 116.6020682 * math.pow(ratio, -2.769034857)
     
-    # Calibration: Sensor reads ~3053 ppm in fresh air. 
-    # Normal fresh air CO2 baseline is ~400 ppm. We scale it down linearly.
-    ppm = ppm * (400.0 / 3053.0)
+    # Calibration: Hardware baseline is ~1122 raw in normal air, which yields ratio ~0.3458 and unscaled ppm ~2240.
+    # Normal fresh air CO2 baseline is ~400 ppm. We scale it down linearly based on this actual hardware average.
+    ppm = ppm * (400.0 / 2240.0)
     
     return round(ppm, 2)
 
@@ -49,7 +49,8 @@ def ldr_to_lux(raw: float) -> float:
     # - Dark (high raw) -> Low adjusted_raw -> Low lux
     adjusted_raw = 4095.0 - raw
     
-    # Quadratic mapping for smooth, intuitive scaling
-    lux = math.pow((adjusted_raw / 4095.0), 2) * 2000.0
+    # Cubic mapping for proper scaling based on hardware average of ~833 raw for normal tube light
+    # With this curve: raw 833 -> ~505 Lux (Normal Tube light). raw 0 -> 1000 Lux. raw 3500+ -> ~0 Lux.
+    lux = math.pow((adjusted_raw / 4095.0), 3) * 1000.0
     
     return round(lux, 2)
