@@ -325,12 +325,7 @@ export const NodesManagement = () => {
                       <Button size="sm" variant="secondary" title="View/Configure Thresholds" onClick={() => openConfigModal(node)}>
                         <Settings size={14} />
                       </Button>
-                      {['admin', 'staff'].includes(currentUser?.role) && (
-                        <Button size="sm" variant="secondary" title={isOffline ? "Bring Online" : "Take Offline"} 
-                                onClick={() => handleUpdateNodeStatus(node.lab_id, isOffline ? 'online' : 'offline')}>
-                          {isOffline ? 'Activate' : 'Deactivate'}
-                        </Button>
-                      )}
+
                       {currentUser?.role === 'admin' && (
                         <Button size="sm" variant="danger" title="Remove Node" onClick={() => handleRemoveNode(node.lab_id)}>
                           <Trash2 size={14} />
