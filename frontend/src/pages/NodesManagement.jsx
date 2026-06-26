@@ -308,10 +308,10 @@ export const NodesManagement = () => {
               const isOffline = nodeSensors.length > 0 && nodeSensors.every(s => s.status === 'offline');
               
               return (
-                <Card key={node.lab_id} className={`node-card ${isOffline ? 'node-offline' : ''}`}>
+                <Card key={node.lab_id} className={`node-card`}>
                   <div className="node-header">
                     <div>
-                      <h3>{node.lab_name} {isOffline && <Badge variant="neutral">OFFLINE</Badge>}</h3>
+                      <h3>{node.lab_name}</h3>
                       <div className="node-id-row" style={{display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px'}}>
                         <span className="node-id" title="Hardware ID">{node.lab_id}</span>
                         <span className="mqtt-topic" style={{fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', background: 'rgba(0,0,0,0.2)', padding: '2px 6px', borderRadius: '4px'}}>
@@ -325,12 +325,12 @@ export const NodesManagement = () => {
                       <Button size="sm" variant="secondary" title="View/Configure Thresholds" onClick={() => openConfigModal(node)}>
                         <Settings size={14} />
                       </Button>
-                      {/* ['admin', 'staff'].includes(currentUser?.role) && (
+                      {['admin', 'staff'].includes(currentUser?.role) && (
                         <Button size="sm" variant="secondary" title={isOffline ? "Bring Online" : "Take Offline"} 
                                 onClick={() => handleUpdateNodeStatus(node.lab_id, isOffline ? 'online' : 'offline')}>
                           {isOffline ? 'Activate' : 'Deactivate'}
                         </Button>
-                      ) */}
+                      )}
                       {currentUser?.role === 'admin' && (
                         <Button size="sm" variant="danger" title="Remove Node" onClick={() => handleRemoveNode(node.lab_id)}>
                           <Trash2 size={14} />
