@@ -8,7 +8,6 @@ import argparse
 def get_args():
     parser = argparse.ArgumentParser(description="Simulate ChemSafe sensor readings")
     parser.add_argument("--url", type=str, default="http://34.14.202.89:8000", help="Base URL of the ChemSafe backend")
-    parser.add_argument("--lab", type=str, default=None, help="Lab ID to simulate (or 'all' for all labs)")
     return parser.parse_args()
 
 args = get_args()
@@ -59,17 +58,7 @@ if __name__ == "__main__":
             labs = response.json()
             target_labs = [lab['lab_id'] for lab in labs]
             print(f"Found {len(target_labs)} labs: {', '.join(target_labs)}")
-            
-            if args.lab:
-                if args.lab.lower() == 'all':
-                    print("CLI flag set to simulate all labs.")
-                elif args.lab in target_labs:
-                    target_labs = [args.lab]
-                    print(f"CLI flag set to simulate specific lab: {args.lab}")
-                else:
-                    print(f"CLI flag lab '{args.lab}' not found in fetched labs. Defaulting to simulate it anyway.")
-                    target_labs = [args.lab]
-            elif len(target_labs) > 1:
+            if len(target_labs) > 1:
                 print("\nMultiple labs detected.")
                 for idx, l in enumerate(target_labs):
                     print(f"[{idx + 1}] {l}")
@@ -85,11 +74,8 @@ if __name__ == "__main__":
         print(f"Could not connect to {LABS_URL}: {e}")
         
     if not target_labs:
-        if args.lab:
-            target_labs = [args.lab]
-        else:
-            print("No labs found in the database. Defaulting to MOCK-LAB-01.")
-            target_labs = ["MOCK-LAB-01"]
+        print("No labs found in the database. Defaulting to MOCK-LAB-01.")
+        target_labs = ["MOCK-LAB-01"]
     
     try:
         while True:
