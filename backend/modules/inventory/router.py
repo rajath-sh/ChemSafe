@@ -70,23 +70,25 @@ def delete_location(
 
 @router.post("/upload")
 async def upload_image(
+    request: Request,
     file: UploadFile = File(...),
     current_user: CurrentUser = Depends(require_role(Role.ADMIN, Role.STAFF))
 ):
-    """Upload a chemical image to the local server."""
-    if not file.content_type.startswith("image/"):
-        raise HTTPException(status_code=400, detail="File must be an image")
-    
-    ext = file.filename.split('.')[-1] if '.' in file.filename else 'jpg'
+    """Upload a chemical image."""
+    import shutil
+    from pathlib import Path
+
+    upload_dir = Path("uploads")
+    upload_dir.mkdir(exist_ok=True)
+
+    ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
     filename = f"{uuid.uuid4().hex}.{ext}"
-    filepath = os.path.join("uploads", filename)
-    
-    with open(filepath, "wb") as buffer:
-        content = await file.read()
-        buffer.write(content)
-        
-    # Return the relative URL to the uploaded file
-    return {"url": f"http://localhost:8000/uploads/{filename}"}
+    filepath = upload_dir / filename
+
+    with filepath.open("wb") as buffer:
+        shutil.copyfileobj(file.file, buffer)
+
+    return {"url": f"{request.base_url}uploads/{filename}"}
 
 import csv
 import io

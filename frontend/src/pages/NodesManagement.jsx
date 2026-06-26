@@ -240,7 +240,7 @@ export const NodesManagement = () => {
       <div className="page-header flex-between">
         <div>
           <h2>Sensor Nodes</h2>
-          <p>Manage ESP32 hardware nodes and their mandatory sensor arrays.</p>
+          <p>Manage ESP32 hardware nodes and their sensors.</p>
         </div>
         <div style={{display: 'flex', gap: '16px', alignItems: 'center'}}>
           <div className="local-search" style={{display: 'flex', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)'}}>
@@ -340,7 +340,7 @@ export const NodesManagement = () => {
                   </div>
                   
                   <div className="sensor-array">
-                    <div className="array-title">Mandatory Sensor Array</div>
+
                     <div className="sensor-list">
                       {SENSOR_TYPES.map(type => {
                         if (type === 'vibration') return null; // Vibration commented out for now
