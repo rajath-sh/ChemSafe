@@ -88,7 +88,7 @@ async def upload_image(
     with filepath.open("wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    return {"url": f"{request.base_url}uploads/{filename}"}
+    return {"url": f"/uploads/{filename}"}
 
 import csv
 import io

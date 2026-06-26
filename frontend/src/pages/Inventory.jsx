@@ -435,10 +435,10 @@ export const Inventory = () => {
                                 <td>
                                   {chem.image_url ? (
                                     <img 
-                                      src={chem.image_url} 
+                                      src={chem.image_url.startsWith('http://127.0.0.1') ? chem.image_url.replace('http://127.0.0.1:8000', import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000') : (chem.image_url.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}${chem.image_url}` : chem.image_url)} 
                                       alt={chem.name} 
                                       className="chem-thumb clickable" 
-                                      onClick={() => setViewingImage(chem.image_url)}
+                                      onClick={() => setViewingImage(chem.image_url.startsWith('http://127.0.0.1') ? chem.image_url.replace('http://127.0.0.1:8000', import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000') : (chem.image_url.startsWith('/uploads') ? `${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}${chem.image_url}` : chem.image_url))}
                                     />
                                   ) : (
                                     <div className="chem-thumb-placeholder"><FlaskConical size={16} /></div>
