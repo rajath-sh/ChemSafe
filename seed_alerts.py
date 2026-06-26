@@ -58,6 +58,16 @@ if __name__ == "__main__":
             labs = response.json()
             target_labs = [lab['lab_id'] for lab in labs]
             print(f"Found {len(target_labs)} labs: {', '.join(target_labs)}")
+            if len(target_labs) > 1:
+                print("\nMultiple labs detected.")
+                for idx, l in enumerate(target_labs):
+                    print(f"[{idx + 1}] {l}")
+                choice = input("Enter the number of the lab to simulate (or press Enter for all): ").strip()
+                if choice.isdigit() and 1 <= int(choice) <= len(target_labs):
+                    target_labs = [target_labs[int(choice) - 1]]
+                    print(f"Selected: {target_labs[0]}")
+                else:
+                    print("Simulating on all labs.")
         else:
             print(f"Failed to fetch labs: {response.status_code}")
     except Exception as e:
