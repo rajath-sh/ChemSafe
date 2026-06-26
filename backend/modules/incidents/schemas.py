@@ -18,7 +18,7 @@ class IncidentCreate(BaseModel):
     lab_id: str
     title: str = Field(..., min_length=3)
     description: Optional[str] = None
-    severity: IncidentSeverity = IncidentSeverity.MEDIUM
+    severity: IncidentSeverity = IncidentSeverity.INFO
     alert_id: Optional[str] = None
 
 class IncidentUpdate(BaseModel):

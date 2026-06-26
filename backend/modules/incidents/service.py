@@ -65,16 +65,28 @@ class IncidentService:
             
         if data.status and data.status != old_status:
             if data.status == IncidentStatus.RESOLVED:
-                event_bus.publish(Events.INCIDENT_RESOLVED, {"incident_id": incident_id})
+                event_bus.publish(Events.INCIDENT_RESOLVED, {"incident_id": incident_id, "lab_id": incident.lab_id, "alert_id": incident.alert_id})
             elif data.status == IncidentStatus.CLOSED:
-                event_bus.publish(Events.INCIDENT_CLOSED, {"incident_id": incident_id})
+                event_bus.publish(Events.INCIDENT_CLOSED, {"incident_id": incident_id, "lab_id": incident.lab_id, "alert_id": incident.alert_id})
             elif data.status == IncidentStatus.IN_PROGRESS:
                 event_bus.publish(Events.INCIDENT_ESCALATED, {"incident_id": incident_id})
             
         return updated_incident
 
+    def delete_incident(self, incident_id: str) -> bool:
+        incident = self.repo.get_by_id(incident_id)
+        if not incident:
+            return False
+        success = self.repo.delete_incident(incident_id)
+        if success:
+            # Tell the system the incident is gone so debouncing can clear
+            event_bus.publish(Events.INCIDENT_CLOSED, {"incident_id": incident_id, "lab_id": incident.lab_id, "alert_id": incident.alert_id})
+        return success
+
     def delete_history(self, before: datetime) -> int:
-        return self.repo.delete_history(before)
+        count = self.repo.delete_history(before)
+        event_bus.publish(Events.INCIDENTS_CLEARED, {})
+        return count
 
     # ── Notes ──
     def add_note(self, incident_id: str, user_id: str, data: IncidentNoteCreate) -> IncidentNoteModel:

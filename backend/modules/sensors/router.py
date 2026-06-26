@@ -60,6 +60,15 @@ def list_sensors(
 ):
     return service.list_sensors(lab_id)
 
+@router.patch("/{sensor_id}", response_model=SensorOut)
+def update_sensor(
+    sensor_id: str,
+    data: SensorUpdate,
+    service: SensorService = Depends(get_sensor_service),
+    current_user: CurrentUser = Depends(require_role(Role.ADMIN, Role.STAFF))
+):
+    return service.update_sensor(sensor_id, data)
+
 @router.get("/readings/{lab_id}")
 def get_sensor_readings(
     lab_id: str,
@@ -115,6 +124,23 @@ def toggle_global_vibration(
     current_user: CurrentUser = Depends(require_role(Role.ADMIN))
 ):
     return service.toggle_global_vibration(status)
+
+from pydantic import BaseModel
+class AlarmCommand(BaseModel):
+    status: str
+
+@router.post("/nodes/{lab_id}/remote_alarm")
+def toggle_remote_alarm(
+    lab_id: str,
+    data: AlarmCommand,
+    service: SensorService = Depends(get_sensor_service),
+    current_user: CurrentUser = Depends(require_role(Role.ADMIN, Role.STAFF))
+):
+    from core.mqtt_client import mqtt_client
+    topic = f"lab/{lab_id}/command"
+    payload = {"command": "alarm", "state": data.status}
+    mqtt_client.publish(topic, payload)
+    return {"message": f"Sent {data.status} to {lab_id}"}
 
 @router.patch("/{sensor_id}", response_model=SensorOut)
 def update_sensor(

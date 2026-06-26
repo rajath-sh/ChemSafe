@@ -123,8 +123,8 @@ try:
         if transmit_data:
             temp = 24.0 + random.uniform(-1.0, 1.0)
             hum = 50.0 + random.uniform(-5.0, 5.0)
-            gas = 2.0 + random.uniform(-0.5, 0.5)
-            light = 300.0 + random.uniform(-20.0, 20.0)
+            gas = 700.0 + random.uniform(-50.0, 50.0) # Raw ADC (approx 400 PPM)
+            light = 2000.0 + random.uniform(-100.0, 100.0) # Raw ADC
             vib = 0.01 + random.uniform(0.0, 0.02)
             
             # Force a critical alert periodically (every 30 seconds)
@@ -132,7 +132,7 @@ try:
             if current_cycle > 0 and current_cycle != last_spike_cycle:
                 print(f"\n[ALERT] {current_cycle * 30} seconds reached! Forcing a critical gas and temperature spike!")
                 temp = 55.0  # Critical
-                gas = 25.0   # Critical
+                gas = 1500.0   # Critical (High ADC)
                 last_spike_cycle = current_cycle
                 
             payload = {

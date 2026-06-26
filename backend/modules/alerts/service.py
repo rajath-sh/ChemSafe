@@ -45,12 +45,18 @@ class AlertService:
         if status == AlertStatus.ACKNOWLEDGED:
             event_bus.publish(Events.ALERT_ACKNOWLEDGED, {"alert_id": alert.alert_id})
         elif status == AlertStatus.CLOSED:
-            event_bus.publish(Events.ALERT_CLOSED, {"alert_id": alert.alert_id})
+            event_bus.publish(Events.ALERT_CLOSED, {
+                "alert_id": alert.alert_id,
+                "lab_id": alert.lab_id,
+                "alert_type": alert.alert_type
+            })
             
         return alert
 
     def delete_history(self, before: datetime) -> int:
-        return self.repo.delete_history(before)
+        count = self.repo.delete_history(before)
+        event_bus.publish(Events.ALERTS_CLEARED, {})
+        return count
 
 
 # ═══════════════════════════════════════════════════════════════

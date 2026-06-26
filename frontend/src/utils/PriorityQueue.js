@@ -14,9 +14,8 @@ export class PriorityQueue {
     // Base Severity Score
     const severityLower = (incident.severity || '').toLowerCase();
     if (severityLower === 'critical') score += 4000000000;
-    else if (severityLower === 'high') score += 3000000000;
-    else if (severityLower === 'medium') score += 2000000000;
-    else if (severityLower === 'low') score += 1000000000;
+    else if (severityLower === 'warning') score += 3000000000;
+    else if (severityLower === 'info') score += 2000000000;
 
     // Age Tie-Breaker
     // Subtract creation timestamp from a fixed future date so that OLDER incidents have a HIGHER tie-breaker score.

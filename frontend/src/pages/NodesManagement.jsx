@@ -4,6 +4,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/Badge';
 import { Activity, Thermometer, Droplets, Wind, Sun, Vibrate, Plus, Trash2, Settings, Search } from 'lucide-react';
+import RemoteAlarmToggle from '../components/ui/RemoteAlarmToggle';
 import './NodesManagement.css';
 
 const SENSOR_TYPES = ['temperature', 'humidity', 'gas', 'light', 'vibration'];
@@ -22,6 +23,16 @@ export const NodesManagement = () => {
   const [sensors, setSensors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [hideStaleData, setHideStaleData] = useState(true);
+
+  // Periodic refresh to keep stale checks updated visually
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Force re-render to update the stale checks
+      setSensors(prev => [...prev]);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
   
   // Modal State
   const [showAddModal, setShowAddModal] = useState(false);
@@ -156,6 +167,8 @@ export const NodesManagement = () => {
       if (currentUser?.role === 'admin') {
         const warningVal = parseFloat(e.target.warning_value.value);
         const criticalVal = parseFloat(e.target.critical_value.value);
+        const minValStr = e.target.min_value?.value;
+        const maxValStr = e.target.max_value?.value;
         
         if (!isNaN(warningVal) && !isNaN(criticalVal)) {
           await apiFetch('/api/sensors/thresholds', {
@@ -164,7 +177,9 @@ export const NodesManagement = () => {
               lab_id: configNode.lab_id,
               sensor_type: configActiveSensor,
               warning_value: warningVal,
-              critical_value: criticalVal
+              critical_value: criticalVal,
+              min_value: minValStr ? parseFloat(minValStr) : null,
+              max_value: maxValStr ? parseFloat(maxValStr) : null
             })
           });
         }
@@ -238,7 +253,17 @@ export const NodesManagement = () => {
               style={{background: 'transparent', border: 'none', color: 'white', outline: 'none', fontSize: '0.9rem', width: '200px'}}
             />
           </div>
-          {currentUser?.role === 'admin' && (
+          {/* <div className="stale-toggle" style={{display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.2)', padding: '6px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)'}}>
+            <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>Hide Disconnected Data</span>
+            <div 
+              className={`switch ${hideStaleData ? 'active' : ''}`} 
+              onClick={() => setHideStaleData(!hideStaleData)}
+              style={{ transform: 'scale(0.8)', cursor: 'pointer' }}
+            >
+              <div className="switch-thumb"></div>
+            </div>
+          </div> */}
+          {/* currentUser?.role === 'admin' && (
             <div className="global-controls" style={{display: 'flex', background: 'rgba(255,255,255,0.05)', padding: '6px 12px', borderRadius: '8px', alignItems: 'center', gap: '12px'}}>
               <span style={{fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px'}}>Master Vibration:</span>
               <Button 
@@ -249,7 +274,7 @@ export const NodesManagement = () => {
                 {isGlobalVibrationOn ? 'Deactivate All' : 'Activate All'}
               </Button>
             </div>
-          )}
+          ) */ }
           {currentUser?.role === 'admin' && (
             <Button onClick={() => setShowAddModal(true)} variant="primary">
               <Plus size={18} /> Add ESP32 Node
@@ -296,15 +321,16 @@ export const NodesManagement = () => {
                       {node.location && <span className="node-location" style={{display: 'block', marginTop: '6px'}}>• {node.location}</span>}
                     </div>
                     <div className="node-actions" style={{display: 'flex', gap: '8px'}}>
+                      <RemoteAlarmToggle labId={node.lab_id} />
                       <Button size="sm" variant="secondary" title="View/Configure Thresholds" onClick={() => openConfigModal(node)}>
                         <Settings size={14} />
                       </Button>
-                      {['admin', 'staff'].includes(currentUser?.role) && (
+                      {/* ['admin', 'staff'].includes(currentUser?.role) && (
                         <Button size="sm" variant="secondary" title={isOffline ? "Bring Online" : "Take Offline"} 
                                 onClick={() => handleUpdateNodeStatus(node.lab_id, isOffline ? 'online' : 'offline')}>
                           {isOffline ? 'Activate' : 'Deactivate'}
                         </Button>
-                      )}
+                      ) */}
                       {currentUser?.role === 'admin' && (
                         <Button size="sm" variant="danger" title="Remove Node" onClick={() => handleRemoveNode(node.lab_id)}>
                           <Trash2 size={14} />
@@ -317,6 +343,7 @@ export const NodesManagement = () => {
                     <div className="array-title">Mandatory Sensor Array</div>
                     <div className="sensor-list">
                       {SENSOR_TYPES.map(type => {
+                        if (type === 'vibration') return null; // Vibration commented out for now
                         const sensor = nodeSensors.find(s => s.sensor_type === type);
                         return (
                           <div key={type} className={`sensor-item ${!sensor ? 'missing' : ''}`}>
@@ -334,7 +361,30 @@ export const NodesManagement = () => {
                                     {sensor.status}
                                   </Badge>
                                   <span className="sensor-reading">
-                                    {sensor.last_reading ? sensor.last_reading.toFixed(2) : '--'}
+                                    {(() => {
+                                      const isStale = sensor.last_updated && (new Date() - new Date(sensor.last_updated)) > 15000;
+                                      
+                                      if (sensor.status !== 'online') {
+                                        return <span style={{ color: 'var(--text-muted)' }}>--</span>;
+                                      }
+                                      if (hideStaleData && isStale) {
+                                        return <span style={{ color: 'var(--text-muted)' }} title="Disconnected or unresponsive">--</span>;
+                                      }
+                                      if (sensor.last_reading !== null && sensor.last_reading !== undefined) {
+                                        return (
+                                          <>
+                                            {sensor.last_reading.toFixed(2)}
+                                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '4px' }}>
+                                              {type === 'temperature' ? '°C' : 
+                                               type === 'humidity' ? '%' : 
+                                               type === 'gas' ? 'PPM' : 
+                                               type === 'light' ? 'Lux' : ''}
+                                            </span>
+                                          </>
+                                        );
+                                      }
+                                      return <span style={{color: 'var(--text-muted)'}}>--</span>;
+                                    })()}
                                   </span>
                                 </div>
                               ) : (
@@ -414,16 +464,19 @@ export const NodesManagement = () => {
             ) : (
               <div className="config-layout">
                 <div className="config-sidebar">
-                  {SENSOR_TYPES.map(type => (
-                    <button 
-                      key={type}
-                      type="button"
-                      className={`config-tab ${configActiveSensor === type ? 'active' : ''}`}
-                      onClick={() => setConfigActiveSensor(type)}
-                    >
-                      {SENSOR_ICONS[type]} <span style={{textTransform: 'capitalize'}}>{type}</span>
-                    </button>
-                  ))}
+                  {SENSOR_TYPES.map(type => {
+                    if (type === 'vibration') return null; // Vibration commented out for now
+                    return (
+                      <button 
+                        key={type}
+                        type="button"
+                        className={`config-tab ${configActiveSensor === type ? 'active' : ''}`}
+                        onClick={() => setConfigActiveSensor(type)}
+                      >
+                        {SENSOR_ICONS[type]} <span style={{textTransform: 'capitalize'}}>{type}</span>
+                      </button>
+                    );
+                  })}
                 </div>
                 
                 <div className="config-body">
@@ -470,6 +523,32 @@ export const NodesManagement = () => {
                           placeholder="e.g. 30.0"
                           className="form-input"
                           required
+                          disabled={currentUser?.role !== 'admin'}
+                        />
+                      </div>
+                    </div>
+                    <div className="form-row" style={{display: 'flex', gap: '16px', marginTop: '16px'}}>
+                      <div className="form-group" style={{flex: 1}}>
+                        <label>Minimum Value</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          name="min_value" 
+                          defaultValue={configThresholds[configActiveSensor]?.min_value !== null ? configThresholds[configActiveSensor]?.min_value : ''}
+                          placeholder="e.g. 20.0"
+                          className="form-input"
+                          disabled={currentUser?.role !== 'admin'}
+                        />
+                      </div>
+                      <div className="form-group" style={{flex: 1}}>
+                        <label>Maximum Value</label>
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          name="max_value" 
+                          defaultValue={configThresholds[configActiveSensor]?.max_value !== null ? configThresholds[configActiveSensor]?.max_value : ''}
+                          placeholder="e.g. 80.0"
+                          className="form-input"
                           disabled={currentUser?.role !== 'admin'}
                         />
                       </div>

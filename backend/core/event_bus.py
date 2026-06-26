@@ -99,6 +99,7 @@ class Events:
     ALERT_CREATED = "alert.created"
     ALERT_ACKNOWLEDGED = "alert.acknowledged"
     ALERT_CLOSED = "alert.closed"
+    ALERTS_CLEARED = "alerts.cleared"
 
     # Incidents
     INCIDENT_CREATED = "incident.created"
@@ -107,6 +108,7 @@ class Events:
     INCIDENT_ESCALATED = "incident.escalated"
     INCIDENT_RESOLVED = "incident.resolved"
     INCIDENT_CLOSED = "incident.closed"
+    INCIDENTS_CLEARED = "incidents.cleared"
 
     # Assignments
     ASSIGNMENT_CREATED = "assignment.created"

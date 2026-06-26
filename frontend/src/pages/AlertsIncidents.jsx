@@ -33,9 +33,9 @@ export const AlertsIncidents = () => {
   // Add Alert State
   const [showAddAlert, setShowAddAlert] = useState(false);
   const [newAlertData, setNewAlertData] = useState({
-    lab_id: '',
+    lab_id: 'LAB-1',
     alert_type: 'gas',
-    severity: 'medium',
+    severity: 'info',
     message: '',
     sensor_value: '',
     threshold_value: ''
@@ -58,9 +58,9 @@ export const AlertsIncidents = () => {
       });
       setShowAddAlert(false);
       setNewAlertData({
-        lab_id: '',
+        lab_id: 'LAB-1',
         alert_type: 'gas',
-        severity: 'medium',
+        severity: 'info',
         message: '',
         sensor_value: '',
         threshold_value: ''
@@ -305,7 +305,7 @@ export const AlertsIncidents = () => {
                       <span><strong>{item.lab_id}</strong> {labs.find(l => l.lab_id === item.lab_id)?.lab_name ? `(${labs.find(l => l.lab_id === item.lab_id).lab_name})` : ''} • {new Date(item.created_at).toLocaleTimeString()}</span>
                       {isFalseAlert && <Badge variant="neutral">Calculated False Alert</Badge>}
                       {!isFalseAlert && (
-                        <Badge variant={item.severity === 'critical' ? 'critical' : 'warning'}>
+                        <Badge variant={item.severity === 'critical' ? 'critical' : (item.severity === 'warning' ? 'warning' : 'neutral')}>
                           {item.severity.toUpperCase()}
                         </Badge>
                       )}
@@ -418,7 +418,7 @@ export const AlertsIncidents = () => {
                         </div>
                       </div>
                       <div style={{display: 'flex', gap: '8px'}}>
-                        <Badge variant={inc.severity === 'critical' ? 'critical' : 'warning'}>
+                        <Badge variant={inc.severity === 'critical' ? 'critical' : (inc.severity === 'warning' ? 'warning' : 'neutral')}>
                           {inc.severity.toUpperCase()}
                         </Badge>
                         <Badge variant={inc.status === 'resolved' ? 'safe' : 'neutral'}>
@@ -571,7 +571,7 @@ export const AlertsIncidents = () => {
                             <div style={{marginBottom: '5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
                               <strong>{node.title || node.incident_id}</strong>
                             </div>
-                            <div style={{color: node.severity === 'critical' ? 'var(--color-critical)' : 'var(--color-warning)'}}>
+                            <div style={{color: node.severity === 'critical' ? 'var(--color-critical)' : (node.severity === 'warning' ? 'var(--color-warning)' : 'var(--text-muted)')}}>
                               {node.severity.toUpperCase()}
                             </div>
                             <div style={{marginTop: '8px', fontSize: '0.75rem', color: 'var(--text-muted)'}}>
@@ -635,9 +635,8 @@ export const AlertsIncidents = () => {
                   <label>Severity Level</label>
                   <select className="form-control" value={newAlertData.severity} onChange={e => setNewAlertData({...newAlertData, severity: e.target.value})}>
                     <option value="critical">CRITICAL</option>
-                    <option value="high">HIGH</option>
-                    <option value="medium">MEDIUM</option>
-                    <option value="low">LOW</option>
+                    <option value="warning">WARNING</option>
+                    <option value="info">INFO</option>
                   </select>
                 </div>
               </div>

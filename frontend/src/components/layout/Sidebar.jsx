@@ -28,7 +28,7 @@ const navItems = [
   { path: '/inventory', icon: <FlaskConical size={20} />, label: 'Inventory', roles: ['admin', 'staff', 'viewer'] },
   { path: '/reports', icon: <FileText size={20} />, label: 'Reports', roles: ['admin', 'staff'] },
   { path: '/ai-assistant', icon: <Bot size={20} />, label: 'AI Assistant', roles: ['admin', 'staff', 'viewer'] },
-  { path: '/settings', icon: <Settings size={20} />, label: 'Settings', roles: ['admin'] },
+  // { path: '/settings', icon: <Settings size={20} />, label: 'Settings', roles: ['admin'] },
   { path: '/users', icon: <ClipboardList size={20} />, label: 'Users', roles: ['admin'] },
   { path: '/algorithms', icon: <Cpu size={20} />, label: 'Algorithms Dashboard', roles: ['admin', 'staff', 'viewer'] },
 ];

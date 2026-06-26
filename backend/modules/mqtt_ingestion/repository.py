@@ -16,8 +16,11 @@ class IngestionRepository(ABC):
     def get_thresholds(self, lab_id: str) -> List[ThresholdModel]:
         pass
 
-    @abstractmethod
     def update_sensor_status(self, lab_id: str, sensor_type: str, value: float) -> None:
+        pass
+
+    @abstractmethod
+    def get_sensor_status(self, lab_id: str, sensor_type: str) -> Optional[str]:
         pass
 
 
@@ -51,6 +54,14 @@ class IngestionRepositorySQLite(IngestionRepository):
             sensor.last_updated = utc_now()
             self.db.commit()
 
+    def get_sensor_status(self, lab_id: str, sensor_type: str) -> Optional[str]:
+        sensor = self.db.execute(
+            select(SensorModel)
+            .where(SensorModel.lab_id == lab_id)
+            .where(SensorModel.sensor_type == sensor_type)
+        ).scalar_one_or_none()
+        return sensor.status.value if sensor else None
+
 
 class IngestionRepositoryFirestore(IngestionRepository):
     def __init__(self, db):
@@ -75,6 +86,12 @@ class IngestionRepositoryFirestore(IngestionRepository):
                 'last_reading': value,
                 'last_updated': utc_now()
             })
+
+    def get_sensor_status(self, lab_id: str, sensor_type: str) -> Optional[str]:
+        docs = self.db.collection('sensors').where('lab_id', '==', lab_id).where('sensor_type', '==', sensor_type).limit(1).get()
+        for doc in docs:
+            return doc.to_dict().get('status')
+        return None
 
 
 def get_ingestion_repository(db) -> IngestionRepository:

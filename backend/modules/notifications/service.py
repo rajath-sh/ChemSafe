@@ -196,8 +196,18 @@ def _handle_alert_created(payload: Dict[str, Any]):
     When any alert is created, notify Admins.
     """
     try:
-        severity = payload.get("severity", "info").upper()
-        alert_id = payload.get("alert_id", "Unknown")
+        # Prevent duplicate notifications: 
+        # The alerts module re-publishes ALERT_CREATED with an alert_id after saving to DB.
+        # We only want the original rich event from the ingestion processor, which has the actual message.
+        if "alert_id" in payload:
+            return
+
+        # Use .value if it's an Enum, or just upper() if it's a string
+        severity_enum = payload.get("severity", "info")
+        if hasattr(severity_enum, "value"):
+            severity = str(severity_enum.value).upper()
+        else:
+            severity = str(severity_enum).upper()
 
         from core.database import get_sqlite_session, get_firestore_client
         from core.config import settings

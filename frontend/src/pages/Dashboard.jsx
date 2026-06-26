@@ -204,7 +204,18 @@ export const Dashboard = () => {
                       </div>
                     </div>
                     <div className="sensor-value">
-                      {sensor.last_reading !== null ? sensor.last_reading : '--'}
+                      {sensor.last_reading !== null ? (
+                        <>
+                          {typeof sensor.last_reading === 'number' ? sensor.last_reading.toFixed(2) : sensor.last_reading}
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '4px' }}>
+                            {sensor.type === 'temperature' ? '°C' : 
+                             sensor.type === 'humidity' ? '%' : 
+                             sensor.type === 'gas' ? 'PPM' : 
+                             sensor.type === 'light' ? 'Lux' : 
+                             sensor.type === 'vibration' ? 'g' : ''}
+                          </span>
+                        </>
+                      ) : '--'}
                     </div>
                   </div>
                 ))

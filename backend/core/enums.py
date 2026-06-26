@@ -54,12 +54,12 @@ class AlertType(str, enum.Enum):
     LIGHT = "light"
     VIBRATION = "vibration"
     ANOMALY = "anomaly"
+    SECURITY = "security"
 
 
 class AlertSeverity(str, enum.Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
+    INFO = "info"
+    WARNING = "warning"
     CRITICAL = "critical"
 
 
@@ -83,9 +83,8 @@ class IncidentStatus(str, enum.Enum):
 
 
 class IncidentSeverity(str, enum.Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
+    INFO = "info"
+    WARNING = "warning"
     CRITICAL = "critical"
 
 
@@ -124,9 +123,8 @@ class StaffAvailability(str, enum.Enum):
 # ═══════════════════════════════════════════════════════════════
 
 class NotificationPriority(str, enum.Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
+    INFO = "info"
+    WARNING = "warning"
     CRITICAL = "critical"
 
 

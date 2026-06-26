@@ -337,7 +337,7 @@ export const Analytics = () => {
                 {renderChart('temperature', 'temperature', 'var(--color-critical)', <><Thermometer size={18} /> Temperature</>, '°C')}
                 {renderChart('humidity', 'humidity', '#3b82f6', <><Droplets size={18} /> Humidity</>, '%')}
                 {renderChart('gas', 'gas', 'var(--color-warning)', <><Wind size={18} /> Air Quality (Gas)</>, 'PPM')}
-                {renderChart('vibration', 'vibration', '#8b5cf6', <><Vibrate size={18} /> Vibration</>, 'g')}
+                {/* {renderChart('vibration', 'vibration', '#8b5cf6', <><Vibrate size={18} /> Vibration</>, 'g')} */}
                 {renderChart('light', 'light', '#f59e0b', <><Sun size={18} /> Ambient Light</>, 'Lux')}
               </div>
             </div>

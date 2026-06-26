@@ -45,22 +45,13 @@ def get_incident(
 ):
     return service.get_incident(incident_id)
 
-@router.delete("/history")
-def delete_incident_history(
-    before: datetime = Query(..., description="Delete incidents created before this timestamp"),
-    service: IncidentService = Depends(get_incident_service),
-    current_user: CurrentUser = Depends(require_role(Role.ADMIN))
-):
-    count = service.repo.delete_history(before)
-    return MessageResponse(message=f"Deleted {count} incidents")
-
 @router.delete("/{incident_id}")
 def delete_incident(
     incident_id: str,
     service: IncidentService = Depends(get_incident_service),
     current_user: CurrentUser = Depends(require_role(Role.ADMIN))
 ):
-    success = service.repo.delete_incident(incident_id)
+    success = service.delete_incident(incident_id)
     if not success:
         raise HTTPException(status_code=404, detail="Incident not found")
     return MessageResponse(message="Incident deleted successfully")

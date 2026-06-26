@@ -254,7 +254,7 @@ export const MergeSortVisualizer = () => {
                       boxShadow: isActive ? '0 0 10px rgba(59, 130, 246, 0.5)' : 'none',
                       opacity: isVisible ? 1 : 0
                     }}>
-                      [{node.val.join(', ')}]
+                      [{currentStep.array.slice(node.l, node.r + 1).join(', ')}]
                     </div>
                     {(node.left || node.right) && (
                       <div style={{ display: 'flex', marginTop: '15px', position: 'relative' }}>

@@ -177,7 +177,7 @@ class IncidentModel(Base):
     lab_id = Column(String(32), ForeignKey("laboratories.lab_id"), nullable=False, index=True)
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
-    severity = Column(Enum(IncidentSeverity), nullable=False, default=IncidentSeverity.MEDIUM)
+    severity = Column(Enum(IncidentSeverity), nullable=False, default=IncidentSeverity.INFO)
     status = Column(Enum(IncidentStatus), nullable=False, default=IncidentStatus.OPEN)
     assigned_staff_id = Column(String(32), ForeignKey("users.user_id"), nullable=True)
     alert_id = Column(String(32), nullable=True)  # Source alert if created from alert
@@ -283,7 +283,7 @@ class NotificationModel(Base):
     user_id = Column(String(32), ForeignKey("users.user_id"), nullable=False, index=True)
     title = Column(String(200), nullable=False)
     message = Column(Text, nullable=True)
-    priority = Column(Enum(NotificationPriority), nullable=False, default=NotificationPriority.MEDIUM)
+    priority = Column(Enum(NotificationPriority), nullable=False, default=NotificationPriority.INFO)
     status = Column(Enum(NotificationStatus), nullable=False, default=NotificationStatus.UNREAD)
     created_at = Column(UTCDateTime, nullable=False, default=utc_now, index=True)
 
@@ -336,7 +336,7 @@ class AnomalyModel(Base):
     anomaly_id = Column(String(32), primary_key=True, default=lambda: generate_id("ANM"))
     lab_id = Column(String(32), ForeignKey("laboratories.lab_id"), nullable=False, index=True)
     sensor_type = Column(Enum(SensorType), nullable=False)
-    severity = Column(Enum(AlertSeverity), nullable=False, default=AlertSeverity.MEDIUM)
+    severity = Column(Enum(AlertSeverity), nullable=False, default=AlertSeverity.INFO)
     description = Column(Text, nullable=True)
     confidence = Column(Float, nullable=False, default=0)  # 0–100
     timestamp = Column(UTCDateTime, nullable=False, default=utc_now, index=True)
