@@ -3,12 +3,18 @@ import time
 import random
 from datetime import datetime
 
-# URL for the backend simulation endpoint
-API_URL = "http://127.0.0.1:8000/api/mqtt/simulate"
+import argparse
 
-# You need an Admin token to hit this endpoint
-# For testing with Auth disabled, you might just need a fake Authorization header or none depending on your auth setup.
-# If auth is disabled, this should work directly.
+def get_args():
+    parser = argparse.ArgumentParser(description="Simulate ChemSafe sensor readings")
+    parser.add_argument("--url", type=str, default="http://34.14.202.89:8000", help="Base URL of the ChemSafe backend")
+    return parser.parse_args()
+
+args = get_args()
+API_BASE_URL = args.url
+SIMULATE_URL = f"{API_BASE_URL}/api/mqtt/simulate"
+LABS_URL = f"{API_BASE_URL}/api/sensors/labs"
+
 HEADERS = {
     "Content-Type": "application/json"
 }
@@ -31,7 +37,7 @@ def simulate_readings(lab_id: str):
     print(f"[{datetime.now().strftime('%H:%M:%S')}] Sending to {lab_id}: {payload}")
     
     try:
-        response = requests.post(API_URL, json=payload, headers=HEADERS)
+        response = requests.post(SIMULATE_URL, json=payload, headers=HEADERS)
         if response.status_code == 200:
             print("  -> Success: Processed by Threshold Engine")
         else:
@@ -40,14 +46,30 @@ def simulate_readings(lab_id: str):
         print(f"  -> Connection Error: {e}")
 
 if __name__ == "__main__":
-    print("🧪 Starting ChemSafe Sensor Simulation...")
+    print(f"🧪 Starting ChemSafe Sensor Simulation against {API_BASE_URL}...")
     print("Press Ctrl+C to stop.\n")
     
-    target_labs = ["LAB-1", "LAB-2", "LAB-3"]
+    # Fetch active labs from the database
+    target_labs = []
+    try:
+        print("Fetching registered labs...")
+        response = requests.get(LABS_URL)
+        if response.status_code == 200:
+            labs = response.json()
+            target_labs = [lab['lab_id'] for lab in labs]
+            print(f"Found {len(target_labs)} labs: {', '.join(target_labs)}")
+        else:
+            print(f"Failed to fetch labs: {response.status_code}")
+    except Exception as e:
+        print(f"Could not connect to {LABS_URL}: {e}")
+        
+    if not target_labs:
+        print("No labs found in the database. Defaulting to MOCK-LAB-01.")
+        target_labs = ["MOCK-LAB-01"]
     
     try:
         while True:
-            # Pick a random lab
+            # Pick a random lab from the dynamically fetched list
             lab = random.choice(target_labs)
             simulate_readings(lab)
             
